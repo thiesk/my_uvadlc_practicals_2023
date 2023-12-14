@@ -187,7 +187,7 @@ class TestCNNEncoderDecoder(unittest.TestCase):
 
         if not skip_test:
             z_dim = 20
-            decoder  = CNNDecoder(z_dim=20)
+            decoder = CNNDecoder(z_dim=20)
             z = torch.randn(64, z_dim)
             imgs = decoder(z)
             self.assertTrue(len(imgs.shape) == 4 and all([imgs.shape[i] == o for i,o in enumerate([64,16,28,28])]),

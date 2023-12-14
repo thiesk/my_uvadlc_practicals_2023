@@ -91,7 +91,7 @@ def elbo_to_bpd(elbo, img_shape):
     # PUT YOUR CODE HERE  #
     #######################
 
-    # use the formula on pdf
+    # use the formula on pdf, exlcuding batch dimension when using img_shape
     bpd = elbo * torch.log2(torch.tensor(torch.e)) * (1 / torch.prod(torch.tensor(img_shape[1:])))
 
     #######################

@@ -109,12 +109,12 @@ class VAE(pl.LightningModule):
         latent_sample = torch.normal(0, 1, (batch_size, self.hparams.z_dim))
 
         # use the decoder to generate categorical image distribution and change order
-        img_dist = self.decoder(latent_sample)
+        img_dist = self.decoder(latent_sample).to(self.device)
 
         # get a tensor for the image batch ready
         _, C, H, W = img_dist.shape
-        x_samples = torch.zeros((batch_size, 1, H, W))
-        img_dist = torch.softmax(img_dist.float(), dim=1)
+        x_samples = torch.zeros((batch_size, 1, H, W)).to(self.device)
+        img_dist = torch.softmax(img_dist.float(), dim=1).to(self.device)
 
         # fill the images using categorical sampling
         for b, img_distr in enumerate(img_dist):

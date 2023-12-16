@@ -71,21 +71,20 @@ class VAE(pl.LightningModule):
         # PUT YOUR CODE HERE  #
         #######################
 
-        imgs.to(self.device)
         # endcode
         mu, log_std = self.encoder(imgs)
-        std = torch.exp(log_std / 2)
+        std = log_std.exp()
         sample = sample_reparameterize(mean=mu, std=std)
 
         img_recon = self.decoder(sample)
 
-        batch_KL_div = torch.mean(KLD(mean=mu, log_std=std))
-
         L_rec = F.cross_entropy(input=img_recon, target=imgs.squeeze(1), reduction='sum') / imgs.shape[0]
 
-        L_reg = batch_KL_div
-        elbo = L_rec - batch_KL_div
-        bpd = elbo_to_bpd(elbo, imgs.shape[1:])
+        L_reg = KLD(mean=mu, log_std=log_std).mean()
+
+        elbo = L_rec - L_reg
+
+        bpd = elbo_to_bpd(elbo, imgs.shape)
 
         #######################
         # END OF YOUR CODE    #

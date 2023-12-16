@@ -71,6 +71,7 @@ class VAE(pl.LightningModule):
         # PUT YOUR CODE HERE  #
         #######################
 
+        imgs.to(self.device)
         # endcode
         mu, log_std = self.encoder(imgs)
         std = torch.exp(log_std / 2)

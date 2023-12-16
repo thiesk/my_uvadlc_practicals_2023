@@ -114,14 +114,16 @@ class VAE(pl.LightningModule):
         # get a tensor for the image batch ready
         _, C, H, W = img_dist.shape
         x_samples = torch.zeros((batch_size, 1, H, W)).to(self.device)
-        img_dist = torch.softmax(img_dist.float(), dim=1).to(self.device)
 
         # fill the images using categorical sampling
-        for b, img_distr in enumerate(img_dist):
+        for b, _ in enumerate(img_dist):
             for i in range(H):
                 for j in range(W):
                     # sample from categorical learned distribution
-                    x_samples[b, 0, i, j] = torch.multinomial(img_dist[b, :, i, j], 1)
+                    print(img_dist[b, :, i, j].float())
+                    print(img_dist[b, :, i, j].float().to(self.device))
+                    print(torch.softmax(img_dist[b, :, i, j].float().to(self.device), dim=0))
+                    x_samples[b, 0, i, j] = torch.multinomial(torch.softmax(img_dist[b, :, i, j].float().to(self.device), dim=0), 1)
 
         #######################
         # END OF YOUR CODE    #

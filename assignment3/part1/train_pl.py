@@ -107,8 +107,10 @@ class VAE(pl.LightningModule):
         # generate noise
         latent_sample = torch.normal(0, 1, (batch_size, self.hparams.z_dim)).to(self.device)
 
+        decode = self.decoder(latent_sample)
+
         # use the decoder to generate categorical image distribution and change order
-        x_samples = torch.softmax(self.decoder(latent_sample), dim=1)
+        x_samples = torch.argmax(decode, dim=1, keepdim=True)
 
         #######################
         # END OF YOUR CODE    #

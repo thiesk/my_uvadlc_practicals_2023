@@ -72,7 +72,8 @@ class VAE(pl.LightningModule):
         #######################
 
         # endcode
-        mu, std = self.encoder(imgs)
+        mu, log_std = self.encoder(imgs)
+        std = torch.exp(log_std / 2)
         sample = sample_reparameterize(mean=mu, std=std)
 
         img_recon = self.decoder(sample)
@@ -103,11 +104,24 @@ class VAE(pl.LightningModule):
         # PUT YOUR CODE HERE  #
         #######################
 
+        # generate noise
         latent_sample = torch.normal(0, 1, (batch_size, self.hparams.z_dim))
 
-        x_samples = self.decoder(latent_sample)
+        # use the decoder to generate categorical image distribution and change order
+        img_dist = self.decoder(latent_sample)
 
-        print("samples in function:", x_samples.shape)
+        # get a tensor for the image batch ready
+        _, C, H, W = img_dist.shape
+        x_samples = torch.zeros((batch_size, 1, H, W))
+        img_dist = torch.softmax(img_dist.float(), dim=1)
+
+        # fill the images using categorical sampling
+        for b, img_distr in enumerate(img_dist):
+            for i in range(H):
+                for j in range(W):
+                    # sample from categorical learned distribution
+                    x_samples[b, 0, i, j] = torch.multinomial(img_dist[b, :, i, j], 1)
+
         #######################
         # END OF YOUR CODE    #
         #######################

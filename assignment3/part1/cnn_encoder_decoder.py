@@ -139,9 +139,10 @@ class CNNDecoder(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
+        z.to(self.device)
         x = self.linear(z)
         x = x.reshape(x.shape[0], -1, 4, 4)
-        x = self.net(x).float()
+        x = self.net(x).float().to(self.device)
 
         #######################
         # END OF YOUR CODE    #

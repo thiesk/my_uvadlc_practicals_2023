@@ -108,7 +108,7 @@ class VAE(pl.LightningModule):
         latent_sample = torch.normal(0, 1, (batch_size, self.hparams.z_dim)).to(self.device)
 
         # use the decoder to generate categorical image distribution and change order
-        x_samples = torch.argmax(torch.softmax(self.decoder(latent_sample), dim=1), dim=1, keepdim=True)
+        x_samples = torch.softmax(self.decoder(latent_sample), dim=1)
 
         #######################
         # END OF YOUR CODE    #

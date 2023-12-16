@@ -119,9 +119,6 @@ class VAE(pl.LightningModule):
             for i in range(H):
                 for j in range(W):
                     # sample from categorical learned distribution
-                    print(img_dist[b, :, i, j])
-                    print(img_dist[b, :, i, j].float().to(self.device))
-                    print(torch.softmax(img_dist[b, :, i, j].float().to(self.device), dim=0))
                     x_samples[b, 0, i, j] = torch.multinomial(torch.softmax(img_dist[b, :, i, j].float().to(self.device), dim=0), 1)
 
         #######################

@@ -105,22 +105,18 @@ class VAE(pl.LightningModule):
         #######################
 
         # generate noise
-        latent_sample = torch.randn(batch_size, self.hparams.z_dim).to(self.device)
+        z = torch.randn((batch_size, self.hparams.z_dim)).to(self.decoder.device)
 
-        # use the decoder to generate categorical image distribution and change order
-        img_dist = self.decoder(latent_sample)
+        # pass through decoder
+        logits = self.decoder(z)
 
-        # get a tensor for the image batch ready
-        _, C, H, W = img_dist.shape
-        x_samples = torch.zeros((batch_size, 1, H, W)).to(self.device)
-        img_dist = F.softmax(img_dist, dim=1)
-        print("hey")
-        # fill the images using categorical sampling
-        for b in range(batch_size):
-            for i in range(H):
-                for j in range(W):
-                    # sample from categorical learned distribution
-                    x_samples[b, 0, i, j] = torch.multinomial(img_dist[b, :, i, j], 1)
+        probabilities = F.softmax(logits) # apply softmax across channels
+        probabilities = torch.permute(probabilities, (0, 2, 3, 1))
+        probabilities = torch.flatten(probabilities, end_dim=2)
+        # sample from categorical
+        x_samples = torch.multinomial(probabilities, 1).reshape(-1, 28, 28, 1)
+        # fix shape again
+        x_samples = torch.permute(x_samples, (0, 3, 1, 2)) # reshape to [B,C,H,W]
 
         #######################
         # END OF YOUR CODE    #

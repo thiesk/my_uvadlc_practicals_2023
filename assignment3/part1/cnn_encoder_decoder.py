@@ -40,18 +40,17 @@ class CNNEncoder(nn.Module):
         #######################
 
         c_hid = num_filters
-        act_fn = nn.GELU
         self.net = nn.Sequential(
             nn.Conv2d(num_input_channels, c_hid, kernel_size=3, padding=1, stride=2), # 32x32 => 16x16
-            act_fn(),
+            nn.GELU(),
             nn.Conv2d(c_hid, c_hid, kernel_size=3, padding=1),
-            act_fn(),
+            nn.GELU(),
             nn.Conv2d(c_hid, 2*c_hid, kernel_size=3, padding=1, stride=2), # 16x16 => 8x8
-            act_fn(),
+            nn.GELU(),
             nn.Conv2d(2*c_hid, 2*c_hid, kernel_size=3, padding=1),
-            act_fn(),
+            nn.GELU(),
             nn.Conv2d(2*c_hid, 2*c_hid, kernel_size=3, padding=1, stride=2), # 8x8 => 4x4
-            act_fn(),
+            nn.GELU(),
             nn.Flatten()
         )
         self.linear_mu = nn.Linear(2 * 16 * c_hid, z_dim)

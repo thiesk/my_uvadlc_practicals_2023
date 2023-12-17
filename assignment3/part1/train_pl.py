@@ -122,6 +122,8 @@ class VAE(pl.LightningModule):
                     # sample from categorical learned distribution
                     x_samples[b, 0, i, j] = torch.multinomial(img_dist[b, :, i, j], 1)
 
+        x_samples = torch.argmax(img_dist, dim=1, keepdim=True)
+
         #######################
         # END OF YOUR CODE    #
         #######################

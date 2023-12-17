@@ -76,9 +76,9 @@ class CNNEncoder(nn.Module):
         #######################
 
         # net
-        encode = self.net(x)
-        mean = self.linear_mu(encode)
-        log_std = self.linear_sigma(encode)
+        x = self.net(x)
+        mean = self.linear_mu(x)
+        log_std = self.linear_sigma(x)
 
         #######################
         # END OF YOUR CODE    #
@@ -106,18 +106,17 @@ class CNNDecoder(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
         c_hid = num_filters
-        act_fn = nn.GELU
         self.linear = nn.Linear(z_dim, 2 * 16 * c_hid)
         self.net = nn.Sequential(
             nn.ConvTranspose2d(2 * c_hid, 2 * c_hid, kernel_size=3, output_padding=1, padding=1, stride=2),
             # 4x4 => 8x8
-            act_fn(),
+            nn.GELU(),
             nn.Conv2d(2 * c_hid, 2 * c_hid, kernel_size=3, padding=1),
-            act_fn(),
+            nn.GELU(),
             nn.ConvTranspose2d(2 * c_hid, c_hid, kernel_size=3, output_padding=1, padding=1, stride=2),  # 8x8 => 16x16
-            act_fn(),
+            nn.GELU(),
             nn.Conv2d(c_hid, c_hid, kernel_size=3, padding=0),
-            act_fn(),
+            nn.GELU(),
             nn.ConvTranspose2d(c_hid, num_input_channels, kernel_size=3, output_padding=1, padding=1, stride=2),
             # 16x16 => 32x32
         )
@@ -139,7 +138,7 @@ class CNNDecoder(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        z.to(self.device)
+
         x = self.linear(z)
         x = x.reshape(x.shape[0], -1, 4, 4)
         x = self.net(x).float().to(self.device)

@@ -113,7 +113,7 @@ class VAE(pl.LightningModule):
         # get a tensor for the image batch ready
         _, C, H, W = img_dist.shape
         x_samples = torch.zeros((batch_size, 1, H, W)).to(self.device)
-        img_dist = torch.softmax(img_dist, dim=1)
+        img_dist = F.softmax(img_dist, dim=1)
 
         # fill the images using categorical sampling
         for b in range(batch_size):

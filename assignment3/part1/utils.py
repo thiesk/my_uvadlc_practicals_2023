@@ -67,10 +67,10 @@ def KLD(mean, log_std):
     # implementing formula from the pdf
 
     # part inside the sum
-    summand = (2 * log_std).exp() + mean.pow(2) - 1 - 2 * log_std
+    summand = 0.5 * ((2 * log_std).exp() + mean.pow(2) - 1 - 2 * log_std)
 
     # sum and dividing by 2
-    KLD = torch.sum(input=summand, dim=-1) / 2
+    KLD = torch.sum(input=summand, dim=1)
 
     #######################
     # END OF YOUR CODE    #

@@ -94,7 +94,7 @@ def elbo_to_bpd(elbo, img_shape):
     B, C, H, W = img_shape
     # use the formula on pdf, exlcuding batch dimension when using img_shape
     nll = elbo.mean()
-    bpd = (nll * torch.log2(torch.tensor(torch.e)) * (1 / (C * H * W)))
+    bpd = (nll * torch.log2(torch.tensor(torch.e))) / (C * H * W)
 
     #######################
     # END OF YOUR CODE    #
@@ -126,6 +126,11 @@ def visualize_manifold(decoder, grid_size=20):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
+    
+    # put channel to last dim
+    img = torch.permute(img, (0, 2, 3, 1))
+    # flatten img
+    
     img_grid = None
     raise NotImplementedError
     #######################

@@ -105,7 +105,7 @@ class VAE(pl.LightningModule):
         #######################
 
         # generate noise
-        latent_sample = torch.normal(0, 1, (batch_size, self.hparams.z_dim)).to(self.device)
+        latent_sample = torch.randn(batch_size, self.hparams.z_dim).to(self.device)
 
         # use the decoder to generate categorical image distribution and change order
         img_dist = self.decoder(latent_sample).to(self.device)

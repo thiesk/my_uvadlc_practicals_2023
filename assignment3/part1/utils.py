@@ -37,7 +37,7 @@ def sample_reparameterize(mean, std):
     #######################
 
     # sample noise
-    epsilon = torch.normal(mean=torch.zeros_like(mean), std=torch.ones_like(std))
+    epsilon = torch.randn_like(std)
 
     # re-parametrisation trick
     z = mean + (std * epsilon)

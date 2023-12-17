@@ -106,17 +106,16 @@ class CNNDecoder(nn.Module):
         #######################
         c_hid = num_filters
         self.linear = nn.Sequential(nn.Linear(z_dim, 2 * 16 * c_hid), nn.GELU())
-        self.net = nn.Sequential(
-            nn.ConvTranspose2d(2 * num_filters, 2 * num_filters, kernel_size=3, output_padding=1, padding=1, stride=2), #4x4 => 7x7
-            nn.GELU(),
-            nn.Conv2d(2 * num_filters, 2 * num_filters, kernel_size=3, padding=1),
-            nn.GELU(),
-            nn.ConvTranspose2d(2 * num_filters, num_filters, kernel_size=3, output_padding=1, padding=1, stride=2),  # 7x7 => 14x14
-            nn.GELU(),
-            nn.Conv2d(num_filters, num_filters, kernel_size=3, padding=1),
-            nn.GELU(),
-            nn.ConvTranspose2d(num_filters, num_input_channels, kernel_size=3, output_padding=1, padding=3, stride=2), #14x14 => 28x28
-            # 16x16 => 32x32
+        self.net = nn.Sequential(   
+            nn.ConvTranspose2d(2*c_hid, 2*c_hid, kernel_size=3, output_padding=1, padding=1, stride=2),
+            act_fn(),
+            nn.Conv2d(2*c_hid, 2*c_hid, kernel_size=3, padding=1),
+            act_fn(),
+            nn.ConvTranspose2d(2*c_hid, c_hid, kernel_size=3, output_padding=1, padding=1, stride=2),
+            act_fn(),
+            nn.Conv2d(c_hid, c_hid, kernel_size=3, padding=1),
+            act_fn(),
+            nn.ConvTranspose2d(c_hid, num_input_channels, kernel_size=3, output_padding=1, padding=3, stride=2) 
         )
 
         #######################

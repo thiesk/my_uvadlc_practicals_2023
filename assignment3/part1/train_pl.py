@@ -125,8 +125,7 @@ class VAE(pl.LightningModule):
         #######################
         # END OF YOUR CODE    #
         #######################
-        return img_dist
-        #return x_samples
+        return x_samples
 
     def configure_optimizers(self):
         # Create optimizer

@@ -108,7 +108,7 @@ class VAE(pl.LightningModule):
         latent_sample = torch.randn(batch_size, self.hparams.z_dim).to(self.device)
 
         # use the decoder to generate categorical image distribution and change order
-        img_dist = self.decoder(latent_sample).to(self.device)
+        img_dist = self.decoder(latent_sample)
 
         # get a tensor for the image batch ready
         _, C, H, W = img_dist.shape
@@ -125,7 +125,8 @@ class VAE(pl.LightningModule):
         #######################
         # END OF YOUR CODE    #
         #######################
-        return x_samples
+        return img_dist
+        #return x_samples
 
     def configure_optimizers(self):
         # Create optimizer

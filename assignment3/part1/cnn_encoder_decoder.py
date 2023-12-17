@@ -140,7 +140,7 @@ class CNNDecoder(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
         
-        x = self.net(x)
+        x = self.net(z)
 
         #######################
         # END OF YOUR CODE    #

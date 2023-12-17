@@ -114,7 +114,7 @@ class VAE(pl.LightningModule):
         _, C, H, W = img_dist.shape
         x_samples = torch.zeros((batch_size, 1, H, W)).to(self.device)
         img_dist = F.softmax(img_dist, dim=1)
-
+        print("hey")
         # fill the images using categorical sampling
         for b in range(batch_size):
             for i in range(H):

@@ -105,7 +105,7 @@ class CNNDecoder(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
         c_hid = num_filters
-        self.linear = nn.Linear(z_dim, 2 * 16 * c_hid)
+        self.linear = nn.Sequential(nn.Linear(z_dim, 2 * 16 * c_hid), nn.GELU())
         self.net = nn.Sequential(
             nn.ConvTranspose2d(2 * c_hid, 2 * c_hid, kernel_size=3, output_padding=1, padding=1, stride=2),
             # 4x4 => 8x8

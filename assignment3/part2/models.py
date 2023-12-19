@@ -117,7 +117,16 @@ class Discriminator(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        raise NotImplementedError
+
+        # put the linear layers
+
+        self.net = nn.Sequential(
+            nn.Linear(z_dim, 512),
+            nn.LeakyReLU(0.2),
+            nn.Linear(512, 512),
+            nn.LeakyReLU(0.2),
+            nn.Linear(512, 1))
+
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -133,8 +142,7 @@ class Discriminator(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        preds = None
-        raise NotImplementedError
+        preds = self.net(z)
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -172,9 +180,9 @@ class AdversarialAE(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        recon_x_ = None
-        z = None
-        raise NotImplementedError
+        z = self.encoder(x)
+        recon_x = self.decoder(z)
+
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -197,11 +205,12 @@ class AdversarialAE(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        ae_loss = None
-        logging_dict = {"gen_loss": None,
-                        "recon_loss": None,
-                        "ae_loss": None}
-        raise NotImplementedError
+        L_gen = -torch.mean(torch.log(self.discriminator(z_fake)))
+        L_rec = F.mse_loss(recon_x, x)
+        ae_loss = lambda_ * L_rec + (1-lambda_) * L_gen
+        logging_dict = {"gen_loss": L_gen.item(),
+                        "recon_loss": L_rec.item(),
+                        "ae_loss": ae_loss.item()}
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -223,12 +232,20 @@ class AdversarialAE(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        disc_loss = None
-        logging_dict = {"disc_loss": None,
-                        "loss_real": None,
-                        "loss_fake": None,
-                        "accuracy": None}
-        raise NotImplementedError
+        size = z_fake.shape[0]
+        z_true = torch.randn(size, self.z_dim).to(self.device)
+        real_label = torch.ones(size, 1).to(self.device)
+        fake_label = torch.zeros(size, 1).to(self.device)
+        discr_real = self.discriminator(z_true)
+        discr_fake = self.discriminator(z_fake)
+        L_real = F.binary_cross_entropy(discr_real, real_label)
+        L_fake = F.binary_cross_entropy(discr_fake, fake_label)
+        disc_loss = L_real + L_fake
+        acc = ((discr_real > 0).sum() + (discr_fake < 0).sum()).float() / (2 * size)
+        logging_dict = {"disc_loss": disc_loss.item(),
+                        "loss_real": L_real.item(),
+                        "loss_fake": L_fake.item(),
+                        "accuracy": acc.item()}
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -247,8 +264,8 @@ class AdversarialAE(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        x = None
-        raise NotImplementedError
+        z = torch.randn(batch_size, self.z_dim).to(self.device)
+        x = self.decoder(z)
         #######################
         # END OF YOUR CODE    #
         #######################

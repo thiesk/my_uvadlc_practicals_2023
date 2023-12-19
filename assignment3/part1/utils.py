@@ -93,13 +93,13 @@ def elbo_to_bpd(elbo, img_shape):
 
     B, C, H, W = img_shape
     # use the formula on pdf, exlcuding batch dimension when using img_shape
-    nll = elbo.mean()
-    bpd = (nll * torch.log2(torch.tensor(torch.e))) / (C * H * W)
-
+    # math: log_2(e) = 1/ ln(2)
+    bpd = elbo / (np.log(2) * (C * H * W))
     #######################
     # END OF YOUR CODE    #
     #######################
     return bpd
+
 
 
 @torch.no_grad()

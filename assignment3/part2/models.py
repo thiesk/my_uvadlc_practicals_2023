@@ -34,7 +34,21 @@ class ConvEncoder(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        raise NotImplementedError
+        num_filters = 32
+        self.net = nn.Sequential(
+            nn.Conv2d(1, num_filters, kernel_size=3, padding=1, stride=2), # 32x32 => 16x16
+            nn.GELU(),
+            nn.Conv2d(num_filters, num_filters, kernel_size=3, padding=1),
+            nn.GELU(),
+            nn.Conv2d(num_filters, 2*num_filters, kernel_size=3, padding=1, stride=2), # 16x16 => 8x8
+            nn.GELU(),
+            nn.Conv2d(2*num_filters, 2*num_filters, kernel_size=3, padding=1),
+            nn.GELU(),
+            nn.Conv2d(2*num_filters, 2*num_filters, kernel_size=3, padding=1, stride=2), # 8x8 => 4x4
+            nn.GELU(),
+            nn.Flatten(), # Image grid to single feature vector
+            nn.Linear(2*16*num_filters, z_dim) # 2*16*num_filters => z_dim
+        )
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -49,8 +63,7 @@ class ConvEncoder(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        x = None
-        raise NotImplementedError
+        z = self.net(x)
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -80,7 +93,21 @@ class ConvDecoder(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        raise NotImplementedError
+        num_filters = 32
+        self.net = nn.Sequential(
+            nn.Linear(z_dim, 2*16*num_filters),
+            nn.GELU(),
+            nn.Unflatten(1, (2*num_filters, 4, 4)),
+            nn.ConvTranspose2d(2*num_filters, 2*num_filters, kernel_size=3, padding=1, stride=2, output_padding=1), # 4x4 => 8x8
+            nn.GELU(),
+            nn.ConvTranspose2d(2*num_filters, 2*num_filters, kernel_size=3, padding=1), # 8x8 => 8x8
+            nn.GELU(),
+            nn.ConvTranspose2d(2*num_filters, num_filters, kernel_size=3, padding=1, stride=2, output_padding=1), # 8x8 => 16x16
+            nn.GELU(),
+            nn.ConvTranspose2d(num_filters, num_filters, kernel_size=2, stride=2, padding=2), # 16x16 => 28x28
+            nn.GELU(),
+            nn.ConvTranspose2d(num_filters, 1, kernel_size=3, padding=1), # 28x28 => 28x28
+        )
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -95,8 +122,11 @@ class ConvDecoder(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        recon_x = None
-        raise NotImplementedError
+
+        x = self.net(z)
+        x = x.reshape(x.shape[0], 2*32, 4, 4)
+        recon_x = self.net(x)
+
         #######################
         # END OF YOUR CODE    #
         #######################

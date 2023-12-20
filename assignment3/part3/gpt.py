@@ -392,7 +392,23 @@ class GPT(nn.Module):
             #######################
             # PUT YOUR CODE HERE  #
             #######################
-            raise NotImplementedError
+
+            # get and prep the valid logits
+            logits = self(idx_cond)[:, -1, :] / temperature
+
+            if top_k is not None:
+                rmv_idx = logits < torch.topk(logits, top_k)[0][..., -1, None]
+                logits[rmv_idx] = float('-inf')
+
+            probabilities = F.softmax(logits, dim=-1)
+
+            if do_sample:
+                next_token = torch.multinomial(probabilities, num_samples=1)
+            else:
+                next_token = torch.argmax(probabilities, dim=-1).unsqueeze(-1)
+
+            idx = torch.cat((idx, next_token), dim=1)
+
             #######################
             # END OF YOUR CODE    #
             #######################

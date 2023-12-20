@@ -40,17 +40,18 @@ class CNNEncoder(nn.Module):
         #######################
 
         c_hid = num_filters
+        act_fn = nn.ReLU
         self.net = nn.Sequential(
             nn.Conv2d(num_input_channels, c_hid, kernel_size=3, padding=1, stride=2), # 32x32 => 16x16
-            nn.GELU(),
+            act_fn,
             nn.Conv2d(c_hid, c_hid, kernel_size=3, padding=1),
-            nn.GELU(),
+            act_fn,
             nn.Conv2d(c_hid, 2*c_hid, kernel_size=3, padding=1, stride=2), # 16x16 => 8x8
-            nn.GELU(),
+            act_fn,
             nn.Conv2d(2*c_hid, 2*c_hid, kernel_size=3, padding=1),
-            nn.GELU(),
+            act_fn,
             nn.Conv2d(2*c_hid, 2*c_hid, kernel_size=3, padding=1, stride=2), # 8x8 => 4x4
-            nn.GELU(),
+            act_fn,
             nn.Flatten()
         )
         self.linear_mu = nn.Linear(2 * 16 * c_hid, z_dim)
@@ -105,20 +106,20 @@ class CNNDecoder(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
         c_hid = num_filters
-        act_fn = nn.GELU
+        act_fn = nn.ReLU
         self.linear = nn.Sequential(nn.Linear(z_dim, 2 * 16 * c_hid), nn.GELU())
         self.net = nn.Sequential(
             nn.Linear(z_dim, 2*16*num_filters),
-            nn.GELU(),
+            act_fn,
             nn.Unflatten(1, (2*num_filters, 4, 4)),
             nn.ConvTranspose2d(2*num_filters, 2*num_filters, kernel_size=3, padding=1, stride=2, output_padding=1), # 4x4 => 8x8
-            nn.GELU(),
+            act_fn,
             nn.ConvTranspose2d(2*num_filters, 2*num_filters, kernel_size=3, padding=1), # 8x8 => 8x8
-            nn.GELU(),
+            act_fn,
             nn.ConvTranspose2d(2*num_filters, num_filters, kernel_size=3, padding=1, stride=2, output_padding=1), # 8x8 => 16x16
-            nn.GELU(),
+            act_fn,
             nn.ConvTranspose2d(num_filters, num_filters, kernel_size=2, stride=2, padding=2), # 16x16 => 28x28
-            nn.GELU(),
+            act_fn,
             nn.ConvTranspose2d(num_filters, num_input_channels, kernel_size=3, padding=1))
             
 

@@ -94,19 +94,24 @@ class ConvDecoder(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
         num_filters = 32
-        self.net = nn.Sequential(
+        c_hid = num_filters
+        self.linear = nn.Sequential(
             nn.Linear(z_dim, 2*16*num_filters),
-            nn.GELU(),
-            nn.Unflatten(1, (2*num_filters, 4, 4)),
-            nn.ConvTranspose2d(2*num_filters, 2*num_filters, kernel_size=3, padding=1, stride=2, output_padding=1), # 4x4 => 8x8
-            nn.GELU(),
-            nn.ConvTranspose2d(2*num_filters, 2*num_filters, kernel_size=3, padding=1), # 8x8 => 8x8
-            nn.GELU(),
-            nn.ConvTranspose2d(2*num_filters, num_filters, kernel_size=3, padding=1, stride=2, output_padding=1), # 8x8 => 16x16
-            nn.GELU(),
-            nn.ConvTranspose2d(num_filters, num_filters, kernel_size=2, stride=2, padding=2), # 16x16 => 28x28
-            nn.GELU(),
-            nn.ConvTranspose2d(num_filters, 1, kernel_size=3, padding=1), # 28x28 => 28x28
+            nn.ReLU()
+        )
+
+        act_fn = nn.ReLU
+        self.net = nn.Sequential(
+            nn.ConvTranspose2d(2 * c_hid, 2 * c_hid, kernel_size=3, output_padding=0, padding=1, stride=2),
+            act_fn(),
+            nn.Conv2d(2 * c_hid, 2 * c_hid, kernel_size=3, padding=1),
+            act_fn(),
+            nn.ConvTranspose2d(2 * c_hid, c_hid, kernel_size=3, output_padding=1, padding=1, stride=2),
+            act_fn(),
+            nn.Conv2d(c_hid, c_hid, kernel_size=3, padding=1),
+            act_fn(),
+            nn.ConvTranspose2d(c_hid, 1, kernel_size=3, output_padding=1, padding=1, stride=2),
+            nn.Tanh()
         )
         #######################
         # END OF YOUR CODE    #
@@ -123,9 +128,9 @@ class ConvDecoder(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
 
-        x = self.net(z)
-        x = x.reshape(x.shape[0], 2*32, 4, 4)
-        recon_x = self.net(x)
+        recon_x = self.linear(z)
+        recon_x = recon_x.reshape(recon_x.shape[0], -1, 4, 4)
+        recon_x = self.net(recon_x)
 
         #######################
         # END OF YOUR CODE    #
@@ -172,7 +177,13 @@ class Discriminator(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
+
         preds = self.net(z)
+
+        # issue with 0 hack
+        eps = torch.randn_like(preds) * 0.0000001
+        preds = preds + eps
+
         #######################
         # END OF YOUR CODE    #
         #######################

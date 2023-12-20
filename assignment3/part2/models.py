@@ -171,7 +171,7 @@ class Discriminator(nn.Module):
         Inputs:
             z - Batch of latent codes. Shape: [B,z_dim]
         Outputs:
-            preds - Predictions whether a specific latent code is fake (<0) or real (>0). 
+            preds - Predictions whether a specific latent code is fake (<0) or real (>0).
                     No sigmoid should be applied on the output. Shape: [B,1]
         """
         #######################
@@ -246,9 +246,11 @@ class AdversarialAE(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        L_gen = -torch.mean(torch.log(self.discriminator(z_fake)))
         L_rec = F.mse_loss(recon_x, x)
-        ae_loss = lambda_ * L_rec + (1-lambda_) * L_gen
+        fake = F.sigmoid(self.decoder(z_fake))
+        L_gen = - torch.mean(torch.log(fake))
+        ae_loss = lambda_ * L_rec + (1 - lambda_) * L_gen
+
         logging_dict = {"gen_loss": L_gen.item(),
                         "recon_loss": L_rec.item(),
                         "ae_loss": ae_loss.item()}
@@ -279,8 +281,8 @@ class AdversarialAE(nn.Module):
         fake_label = torch.zeros(size, 1).to(self.device)
         discr_real = self.discriminator(z_true)
         discr_fake = self.discriminator(z_fake)
-        L_real = F.binary_cross_entropy(discr_real, real_label)
-        L_fake = F.binary_cross_entropy(discr_fake, fake_label)
+        L_real = F.binary_cross_entropy_with_logits(discr_real, real_label)
+        L_fake = F.binary_cross_entropy_with_logits(discr_fake, fake_label)
         disc_loss = L_real + L_fake
         acc = ((discr_real > 0).sum() + (discr_fake < 0).sum()).float() / (2 * size)
         logging_dict = {"disc_loss": disc_loss.item(),

@@ -90,7 +90,23 @@ class CausalSelfAttention(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        raise NotImplementedError
+
+        # attention formula
+        attention = (q @ k.transpose(-2, -1)) / math.sqrt(n_embd // self.n_head)
+
+        # mask if needed
+        if self.mask is not None:
+            attention = attention.masked_fill(self.mask[:, :, :seq_len, :seq_len] == 0, float('-inf'))
+
+        # apply nonlinearity
+        attention = F.softmax(attention, dim=-1)
+
+        # Dropout
+        attention = self.attn_dropout(attention)
+
+        # Apply attention to the values
+        y = attention @ v
+
         #######################
         # END OF YOUR CODE    #
         #######################
